@@ -61,6 +61,33 @@ function update() {
   if ( keys.left ) paddle.x -= paddle.speed;
   if ( keys.right ) paddle.x += paddle.speed;
   paddle.x = Math.max( 0, Math.min( canvas.width - paddle.w, paddle.x ) );
+
+  if ( !state.ballAttached ) moveBall();
+}
+
+function moveBall() {
+  const ball = state.ball;
+  ball.x += ball.vx;
+  ball.y += ball.vy;
+
+  if ( ball.x - ball.r <= 0 ) {
+    ball.x = ball.r;
+    ball.vx = -ball.vx;
+  } else if ( ball.x + ball.r >= canvas.width ) {
+    ball.x = canvas.width - ball.r;
+    ball.vx = -ball.vx;
+  }
+
+  if ( ball.y - ball.r <= 0 ) {
+    ball.y = ball.r;
+    ball.vy = -ball.vy;
+  }
+
+  if ( ball.y + ball.r >= canvas.height ) {
+    ball.y = canvas.height - ball.r;
+    ball.vx = 0;
+    ball.vy = 0;
+  }
 }
 
 function loop() {
