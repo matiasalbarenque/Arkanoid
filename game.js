@@ -49,6 +49,12 @@ const keys = { left: false, right: false };
 window.addEventListener( 'keydown', ( e ) => {
   if ( e.key === 'ArrowLeft' ) keys.left = true;
   if ( e.key === 'ArrowRight' ) keys.right = true;
+
+  if ( state.ballAttached && state.screen === 'playing' ) {
+    state.ballAttached = false;
+    state.ball.vx = 0;
+    state.ball.vy = -state.ball.speed;
+  }
 } );
 
 window.addEventListener( 'keyup', ( e ) => {
@@ -62,7 +68,12 @@ function update() {
   if ( keys.right ) paddle.x += paddle.speed;
   paddle.x = Math.max( 0, Math.min( canvas.width - paddle.w, paddle.x ) );
 
-  if ( !state.ballAttached ) moveBall();
+  if ( state.ballAttached ) {
+    state.ball.x = paddle.x + paddle.w / 2;
+    state.ball.y = paddle.y - state.ball.r;
+  } else {
+    moveBall();
+  }
 }
 
 function moveBall() {
@@ -152,6 +163,10 @@ function checkBrickCollision() {
     brick.alive = false;
     state.score += 10;
     console.log( 'score:', state.score );
+
+    if ( state.bricks.every( ( b ) => !b.alive ) ) {
+      state.screen = 'won';
+    }
 
     const overlapX = ball.r - Math.abs( dx );
     const overlapY = ball.r - Math.abs( dy );
