@@ -84,6 +84,7 @@ function moveBall() {
   }
 
   checkPaddleCollision();
+  checkBrickCollision();
 
   if ( ball.y + ball.r >= canvas.height ) {
     ball.y = canvas.height - ball.r;
@@ -118,6 +119,36 @@ function checkPaddleCollision() {
   ball.vx = ball.speed * Math.sin( angle );
   ball.vy = -ball.speed * Math.cos( angle );
   ball.y = paddle.y - ball.r;
+}
+
+function checkBrickCollision() {
+  const ball = state.ball;
+
+  for ( const brick of state.bricks ) {
+    if ( !brick.alive ) continue;
+
+    const closestX = Math.max( brick.x, Math.min( ball.x, brick.x + brick.w ) );
+    const closestY = Math.max( brick.y, Math.min( ball.y, brick.y + brick.h ) );
+    const dx = ball.x - closestX;
+    const dy = ball.y - closestY;
+
+    if ( dx * dx + dy * dy > ball.r * ball.r ) continue;
+
+    brick.alive = false;
+    state.score += 10;
+    console.log( 'score:', state.score );
+
+    const overlapX = ball.r - Math.abs( dx );
+    const overlapY = ball.r - Math.abs( dy );
+
+    if ( overlapX < overlapY ) {
+      ball.vx = -ball.vx;
+    } else {
+      ball.vy = -ball.vy;
+    }
+
+    break;
+  }
 }
 
 function draw() {
