@@ -1,6 +1,6 @@
 # SPEC 01 — MVP jugable de Arkanoid
 
-> **Status:** Draft
+> **Status:** approved
 > **Depends on:** ninguno
 > **Date:** 2026-08-12
 > **Objective:** Un único nivel jugable de Arkanoid en canvas, con pala controlada por teclado, bola con rebote de ángulo variable, bloques que se rompen sumando puntaje, 3 vidas, y pantallas de victoria/derrota con reinicio.
