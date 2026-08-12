@@ -63,6 +63,8 @@ window.addEventListener( 'keyup', ( e ) => {
 } );
 
 function update() {
+  if ( state.screen !== 'playing' ) return;
+
   const paddle = state.paddle;
   if ( keys.left ) paddle.x -= paddle.speed;
   if ( keys.right ) paddle.x += paddle.speed;
@@ -181,6 +183,8 @@ function checkBrickCollision() {
   }
 }
 
+const restartButton = { x: 300, y: 340, w: 200, h: 50 };
+
 function draw() {
   ctx.clearRect( 0, 0, canvas.width, canvas.height );
 
@@ -191,6 +195,57 @@ function draw() {
 
   drawSprite( ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h );
   drawSprite( ctx, 'ball', state.ball.x - state.ball.r, state.ball.y - state.ball.r, state.ball.r * 2, state.ball.r * 2 );
+
+  drawHud();
+
+  if ( state.screen === 'won' ) drawOverlay( '¡Ganaste!' );
+  if ( state.screen === 'lost' ) drawOverlay( 'Perdiste' );
 }
+
+function drawHud() {
+  ctx.fillStyle = '#fff';
+  ctx.font = '18px sans-serif';
+  ctx.textBaseline = 'top';
+  ctx.fillText( `Puntaje: ${ state.score }`, 10, 10 );
+  ctx.fillText( `Vidas: ${ state.lives }`, canvas.width - 100, 10 );
+}
+
+function drawOverlay( title ) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillRect( 0, 0, canvas.width, canvas.height );
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '48px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText( title, canvas.width / 2, 250 );
+
+  ctx.fillStyle = '#444';
+  ctx.fillRect( restartButton.x, restartButton.y, restartButton.w, restartButton.h );
+  ctx.strokeStyle = '#fff';
+  ctx.strokeRect( restartButton.x, restartButton.y, restartButton.w, restartButton.h );
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '20px sans-serif';
+  ctx.fillText( 'Reiniciar', canvas.width / 2, restartButton.y + restartButton.h / 2 );
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+}
+
+canvas.addEventListener( 'click', ( e ) => {
+  if ( state.screen === 'playing' ) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
+
+  const inside = clickX >= restartButton.x && clickX <= restartButton.x + restartButton.w &&
+    clickY >= restartButton.y && clickY <= restartButton.y + restartButton.h;
+
+  if ( inside ) {
+    state = createInitialState();
+  }
+} );
 
 loadSpritesheet( loop );
