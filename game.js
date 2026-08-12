@@ -83,6 +83,8 @@ function moveBall() {
     ball.vy = -ball.vy;
   }
 
+  checkPaddleCollision();
+
   if ( ball.y + ball.r >= canvas.height ) {
     ball.y = canvas.height - ball.r;
     ball.vx = 0;
@@ -94,6 +96,28 @@ function loop() {
   update();
   draw();
   requestAnimationFrame( loop );
+}
+
+const PADDLE_MAX_BOUNCE_ANGLE = Math.PI * ( 60 / 180 );
+
+function checkPaddleCollision() {
+  const ball = state.ball;
+  const paddle = state.paddle;
+
+  if ( ball.vy <= 0 ) return;
+  if ( ball.y + ball.r < paddle.y ) return;
+  if ( ball.y - ball.r > paddle.y + paddle.h ) return;
+  if ( ball.x + ball.r < paddle.x ) return;
+  if ( ball.x - ball.r > paddle.x + paddle.w ) return;
+
+  const paddleCenter = paddle.x + paddle.w / 2;
+  const relativeIntersect = ( ball.x - paddleCenter ) / ( paddle.w / 2 );
+  const clamped = Math.max( -1, Math.min( 1, relativeIntersect ) );
+  const angle = clamped * PADDLE_MAX_BOUNCE_ANGLE;
+
+  ball.vx = ball.speed * Math.sin( angle );
+  ball.vy = -ball.speed * Math.cos( angle );
+  ball.y = paddle.y - ball.r;
 }
 
 function draw() {
