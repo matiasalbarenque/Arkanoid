@@ -87,9 +87,24 @@ function moveBall() {
   checkBrickCollision();
 
   if ( ball.y + ball.r >= canvas.height ) {
-    ball.y = canvas.height - ball.r;
-    ball.vx = 0;
-    ball.vy = 0;
+    loseLife();
+  }
+}
+
+function loseLife() {
+  state.lives -= 1;
+
+  state.paddle.x = 320;
+  state.paddle.y = 560;
+
+  state.ball.x = 401;
+  state.ball.y = 546;
+  state.ball.vx = 0;
+  state.ball.vy = 0;
+  state.ballAttached = true;
+
+  if ( state.lives === 0 ) {
+    state.screen = 'lost';
   }
 }
 
