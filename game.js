@@ -44,6 +44,31 @@ function createInitialState() {
 
 let state = createInitialState();
 
+const keys = { left: false, right: false };
+
+window.addEventListener( 'keydown', ( e ) => {
+  if ( e.key === 'ArrowLeft' ) keys.left = true;
+  if ( e.key === 'ArrowRight' ) keys.right = true;
+} );
+
+window.addEventListener( 'keyup', ( e ) => {
+  if ( e.key === 'ArrowLeft' ) keys.left = false;
+  if ( e.key === 'ArrowRight' ) keys.right = false;
+} );
+
+function update() {
+  const paddle = state.paddle;
+  if ( keys.left ) paddle.x -= paddle.speed;
+  if ( keys.right ) paddle.x += paddle.speed;
+  paddle.x = Math.max( 0, Math.min( canvas.width - paddle.w, paddle.x ) );
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame( loop );
+}
+
 function draw() {
   ctx.clearRect( 0, 0, canvas.width, canvas.height );
 
@@ -56,4 +81,4 @@ function draw() {
   drawSprite( ctx, 'ball', state.ball.x - state.ball.r, state.ball.y - state.ball.r, state.ball.r * 2, state.ball.r * 2 );
 }
 
-loadSpritesheet( draw );
+loadSpritesheet( loop );
