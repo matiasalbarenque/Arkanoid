@@ -1,6 +1,14 @@
 const canvas = document.getElementById( 'game' );
 const ctx = canvas.getContext( '2d' );
 
+const ballBounceSound = new Audio( 'assets/sounds/ball-bounce.mp3' );
+const breakSound = new Audio( 'assets/sounds/break-sound.mp3' );
+
+function playSound( audio ) {
+  audio.currentTime = 0;
+  audio.play();
+}
+
 const BRICK_COLS = 8;
 const BRICK_ROWS = 5;
 const BRICK_W = 90;
@@ -109,14 +117,17 @@ function moveBall() {
   if ( ball.x - ball.r <= 0 ) {
     ball.x = ball.r;
     ball.vx = -ball.vx;
+    playSound( ballBounceSound );
   } else if ( ball.x + ball.r >= canvas.width ) {
     ball.x = canvas.width - ball.r;
     ball.vx = -ball.vx;
+    playSound( ballBounceSound );
   }
 
   if ( ball.y - ball.r <= 0 ) {
     ball.y = ball.r;
     ball.vy = -ball.vy;
+    playSound( ballBounceSound );
   }
 
   checkPaddleCollision();
@@ -170,6 +181,7 @@ function checkPaddleCollision() {
   ball.vx = ball.speed * Math.sin( angle );
   ball.vy = -ball.speed * Math.cos( angle );
   ball.y = paddle.y - ball.r;
+  playSound( ballBounceSound );
 }
 
 function checkBrickCollision() {
