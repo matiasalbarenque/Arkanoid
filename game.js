@@ -42,9 +42,9 @@ function createInitialState() {
     lives: 3,
     ballAttached: true,
 
-    paddle: { x: 320, y: 560, w: 162, h: 14, speed: 8 },
+    paddle: { x: 320, y: 560, w: 81, h: 14, speed: 8 },
 
-    ball: { x: 401, y: 546, r: 8, vx: 0, vy: 0, speed: 5.6 },
+    ball: { x: 401, y: 546, r: 8, vx: 0, vy: 0, speed: 4.48 },
 
     bricks: createBricks(),
 
