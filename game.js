@@ -3,11 +3,26 @@ const ctx = canvas.getContext( '2d' );
 
 const ballBounceSound = new Audio( 'assets/sounds/ball-bounce.mp3' );
 const breakSound = new Audio( 'assets/sounds/break-sound.mp3' );
+const boostSound = new Audio( 'assets/sounds/boost.mp3' );
 
 function playSound( audio ) {
   audio.currentTime = 0;
   audio.play();
 }
+
+const boostImg = new Image();
+boostImg.loaded = false;
+boostImg.onload = () => { boostImg.loaded = true; };
+boostImg.src = 'assets/icons/star.png';
+
+const BOOST_CHECK_INTERVAL = 5000;
+const BOOST_SPAWN_CHANCE = 0.1;
+const BOOST_FALL_SPEED = 2;
+const BOOST_ROTATION_SPEED = Math.PI; // rad/s (~180°/s)
+const BOOST_SIZE = 24;
+const PADDLE_BOOST_STEP = 0.2; // +20% del ancho base por catch
+const PADDLE_BOOST_MAX = 2; // tope: 2x ancho base
+const BOOST_DURATION = 10000;
 
 const BRICK_COLS = 11;
 const BRICK_ROWS = 5;
