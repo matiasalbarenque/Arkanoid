@@ -192,9 +192,12 @@ function checkBrickCollision() {
     state.explosions.push( {
       x: brick.x,
       y: brick.y,
+      w: brick.w,
+      h: brick.h,
       color: brick.color,
       frameIndex: 0,
       frameStartedAt: performance.now(),
+      startedAt: performance.now(),
     } );
 
     if ( state.bricks.every( ( b ) => !b.alive ) ) {
@@ -235,15 +238,24 @@ function draw() {
   if ( state.screen === 'lost' ) drawOverlay( 'Perdiste' );
 }
 
-const EXPLOSION_W = 32;
-const EXPLOSION_H = 16;
+const EXPLOSION_SCALE = 1.4; // escala final, 1.0 = tamaño del bloque
+const EXPLOSION_GROW_DURATION = 500; // ms que tarda en crecer de 1.0 a EXPLOSION_SCALE
 
 function drawExplosions() {
+  const now = performance.now();
+
   for ( const explosion of state.explosions ) {
     const frame = EXPLOSION_FRAMES[ explosion.color ][ explosion.frameIndex ];
-    const x = explosion.x + ( BRICK_W - EXPLOSION_W ) / 2;
-    const y = explosion.y + ( BRICK_H - EXPLOSION_H ) / 2;
-    drawFrame( ctx, frame, x, y, EXPLOSION_W, EXPLOSION_H );
+
+    const t = Math.min( 1, ( now - explosion.startedAt ) / EXPLOSION_GROW_DURATION );
+    const eased = 1 - ( 1 - t ) * ( 1 - t );
+    const scale = 1 + ( EXPLOSION_SCALE - 1 ) * eased;
+
+    const w = explosion.w * scale;
+    const h = explosion.h * scale;
+    const x = explosion.x + ( explosion.w - w ) / 2;
+    const y = explosion.y + ( explosion.h - h ) / 2;
+    drawFrame( ctx, frame, x, y, w, h );
   }
 }
 
