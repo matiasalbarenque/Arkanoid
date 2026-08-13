@@ -2,6 +2,8 @@
 
 Arkanoid game in plain HTML, CSS, and JavaScript. Zero dependencies, no `package.json` or build tool.
 
+Demo: https://matiasalbarenque.github.io/Arkanoid/
+
 ## How to play
 
 Open `index.html` in the browser. No server or installation required.
