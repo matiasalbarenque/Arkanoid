@@ -39,6 +39,8 @@ function createInitialState() {
     ball: { x: 401, y: 546, r: 8, vx: 0, vy: 0, speed: 5.6 },
 
     bricks: createBricks(),
+
+    explosions: [],
   };
 }
 
@@ -75,6 +77,27 @@ function update() {
     state.ball.y = paddle.y - state.ball.r;
   } else {
     moveBall();
+  }
+
+  updateExplosions();
+}
+
+const EXPLOSION_FRAME_DURATION = 150;
+
+function updateExplosions() {
+  const now = performance.now();
+
+  for ( let i = state.explosions.length - 1; i >= 0; i-- ) {
+    const explosion = state.explosions[ i ];
+
+    if ( now - explosion.frameStartedAt >= EXPLOSION_FRAME_DURATION ) {
+      explosion.frameIndex += 1;
+      explosion.frameStartedAt = now;
+
+      if ( explosion.frameIndex > 3 ) {
+        state.explosions.splice( i, 1 );
+      }
+    }
   }
 }
 
@@ -166,6 +189,14 @@ function checkBrickCollision() {
     state.score += 10;
     console.log( 'score:', state.score );
 
+    state.explosions.push( {
+      x: brick.x,
+      y: brick.y,
+      color: brick.color,
+      frameIndex: 0,
+      frameStartedAt: performance.now(),
+    } );
+
     if ( state.bricks.every( ( b ) => !b.alive ) ) {
       state.screen = 'won';
     }
@@ -193,6 +224,8 @@ function draw() {
     drawSprite( ctx, `block_${ brick.color }`, brick.x, brick.y, brick.w, brick.h );
   }
 
+  drawExplosions();
+
   drawSprite( ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h );
   drawSprite( ctx, 'ball', state.ball.x - state.ball.r, state.ball.y - state.ball.r, state.ball.r * 2, state.ball.r * 2 );
 
@@ -200,6 +233,18 @@ function draw() {
 
   if ( state.screen === 'won' ) drawOverlay( '¡Ganaste!' );
   if ( state.screen === 'lost' ) drawOverlay( 'Perdiste' );
+}
+
+const EXPLOSION_W = 32;
+const EXPLOSION_H = 16;
+
+function drawExplosions() {
+  for ( const explosion of state.explosions ) {
+    const frame = EXPLOSION_FRAMES[ explosion.color ][ explosion.frameIndex ];
+    const x = explosion.x + ( BRICK_W - EXPLOSION_W ) / 2;
+    const y = explosion.y + ( BRICK_H - EXPLOSION_H ) / 2;
+    drawFrame( ctx, frame, x, y, EXPLOSION_W, EXPLOSION_H );
+  }
 }
 
 function drawHud() {
