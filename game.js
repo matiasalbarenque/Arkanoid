@@ -139,6 +139,7 @@ function moveBall() {
 }
 
 function loseLife() {
+  playSound( breakSound );
   state.lives -= 1;
 
   state.paddle.x = 320;
@@ -198,6 +199,7 @@ function checkBrickCollision() {
     if ( dx * dx + dy * dy > ball.r * ball.r ) continue;
 
     brick.alive = false;
+    playSound( breakSound );
     state.score += 10;
     console.log( 'score:', state.score );
 

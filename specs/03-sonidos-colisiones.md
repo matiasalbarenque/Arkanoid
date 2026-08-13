@@ -1,6 +1,6 @@
 # SPEC 03 — Sonidos de colisiones
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 01
 > **Date:** 2026-08-13
 > **Objective:** Al rebotar la bola contra bordes de pantalla o la pala se reproduce `ball-bounce.mp3`, y al romperse un bloque o perder una vida se reproduce `break-sound.mp3`.
@@ -54,12 +54,12 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] El juego carga sin errores en consola con los dos sonidos precargados.
-- [ ] La bola rebotando contra la pared izquierda, derecha o superior reproduce `ball-bounce.mp3`.
-- [ ] La bola rebotando contra la pala reproduce `ball-bounce.mp3`.
-- [ ] Romper un bloque reproduce `break-sound.mp3`.
-- [ ] Perder una vida (bola cae por debajo del canvas) reproduce `break-sound.mp3`.
-- [ ] Rebotes o roturas consecutivos en menos de la duración de un sonido no cortan el sonido en curso ni generan errores en consola.
+- [x] El juego carga sin errores en consola con los dos sonidos precargados.
+- [x] La bola rebotando contra la pared izquierda, derecha o superior reproduce `ball-bounce.mp3`.
+- [x] La bola rebotando contra la pala reproduce `ball-bounce.mp3`.
+- [x] Romper un bloque reproduce `break-sound.mp3`.
+- [x] Perder una vida (bola cae por debajo del canvas) reproduce `break-sound.mp3`.
+- [x] Rebotes o roturas consecutivos en menos de la duración de un sonido no cortan el sonido en curso ni generan errores en consola.
 
 ---
 
