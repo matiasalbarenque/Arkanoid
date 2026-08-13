@@ -57,13 +57,15 @@ function createInitialState() {
     lives: 3,
     ballAttached: true,
 
-    paddle: { x: 320, y: 560, w: 81, h: 14, speed: 8 },
+    paddle: { x: 320, y: 560, w: 81, h: 14, speed: 8, baseW: 81, boostExpiresAt: null },
 
-    ball: { x: 401, y: 546, r: 8, vx: 0, vy: 0, speed: 4.48 },
+    ball: { x: 401, y: 546, r: 8, vx: 0, vy: 0, speed: 4.48, baseSpeed: 4.48 },
 
     bricks: createBricks(),
 
     explosions: [],
+
+    fallingBoosts: [],
   };
 }
 
@@ -103,6 +105,60 @@ function update() {
   }
 
   updateExplosions();
+  updateBoostSpawn();
+  updateFallingBoosts();
+}
+
+function updateFallingBoosts() {
+  const paddle = state.paddle;
+
+  for ( let i = state.fallingBoosts.length - 1; i >= 0; i-- ) {
+    const boost = state.fallingBoosts[ i ];
+    boost.y += BOOST_FALL_SPEED;
+    boost.rotation += BOOST_ROTATION_SPEED / 60;
+
+    if ( boost.y > canvas.height ) {
+      state.fallingBoosts.splice( i, 1 );
+      continue;
+    }
+
+    const overlaps = boost.x < paddle.x + paddle.w && boost.x + boost.w > paddle.x &&
+      boost.y < paddle.y + paddle.h && boost.y + boost.h > paddle.y;
+
+    if ( overlaps ) {
+      applyPaddleBoost();
+      playSound( boostSound );
+      state.fallingBoosts.splice( i, 1 );
+    }
+  }
+}
+
+function applyPaddleBoost() {
+  const paddle = state.paddle;
+  const ball = state.ball;
+
+  paddle.w = Math.min( paddle.baseW * PADDLE_BOOST_MAX, paddle.w + paddle.baseW * PADDLE_BOOST_STEP );
+  ball.speed = ball.speed * 1.10;
+  paddle.boostExpiresAt = performance.now() + BOOST_DURATION;
+}
+
+let lastBoostCheckAt = performance.now();
+
+function updateBoostSpawn() {
+  const now = performance.now();
+  if ( now - lastBoostCheckAt < BOOST_CHECK_INTERVAL ) return;
+  lastBoostCheckAt = now;
+
+  if ( Math.random() < BOOST_SPAWN_CHANCE ) {
+    state.fallingBoosts.push( {
+      x: Math.random() * ( canvas.width - BOOST_SIZE ),
+      y: 0,
+      w: BOOST_SIZE,
+      h: BOOST_SIZE,
+      rotation: 0,
+    } );
+    console.log( 'boost spawned' );
+  }
 }
 
 const EXPLOSION_FRAME_DURATION = 150;
