@@ -206,8 +206,19 @@ function drawHud() {
   ctx.fillStyle = '#fff';
   ctx.font = '18px sans-serif';
   ctx.textBaseline = 'top';
-  ctx.fillText( `Puntaje: ${ state.score }`, 10, 10 );
-  ctx.fillText( `Vidas: ${ state.lives }`, canvas.width - 100, 10 );
+  const livesLabel = `Vidas: ${ state.lives }`;
+  const livesX = 10;
+  ctx.fillText( livesLabel, livesX, 10 );
+
+  const iconSize = 14;
+  const iconGap = 4;
+  const iconsX = livesX + ctx.measureText( livesLabel ).width + 10;
+  for ( let i = 0; i < state.lives; i++ ) {
+    drawSprite( ctx, 'ball', iconsX + i * ( iconSize + iconGap ), 11, iconSize, iconSize );
+  }
+
+  const scoreLabel = `Puntaje: ${ state.score }`;
+  ctx.fillText( scoreLabel, canvas.width - ctx.measureText( scoreLabel ).width - 10, 10 );
 }
 
 function drawOverlay( title ) {
