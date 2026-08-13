@@ -1,30 +1,35 @@
-# Juego de Arkanoid
+# Arkanoid Game
 
-Juego de Arkanoid en HTML, CSS y JavaScript puro. Cero dependencias, sin `package.json` ni build tool.
+Arkanoid game in plain HTML, CSS, and JavaScript. Zero dependencies, no `package.json` or build tool.
 
-## Cómo jugar
+## How to play
 
-Abrir `index.html` en el navegador. No requiere servidor ni instalación.
+Open `index.html` in the browser. No server or installation required.
 
-## Estado del proyecto
+### Controls
 
-MVP jugable implementado, con mejoras incrementales vía specs:
+- **Left Arrow / Right Arrow** — move the paddle.
+- **Mouse click** — click the "Reiniciar" button to restart after winning or losing.
 
-- **SPEC 01** — MVP jugable: nivel único en canvas, pala controlada por teclado, bola con rebote de ángulo variable, bloques que suman puntaje, 3 vidas, pantallas de victoria/derrota con reinicio.
-- **SPEC 02** — Destrucción de bloques animada: explosión de 4 frames al romperse un bloque.
-- **SPEC 03** — Sonidos de colisiones: sonido al rebotar la bola y al romperse un bloque o perder una vida.
-- **SPEC 04** — Boost de agrandar pala: ítem que cae ocasionalmente y, al ser atrapado, agranda la pala y acelera la bola de forma temporal.
+## Project status
 
-Detalle completo de cada spec en `specs/01-mvp-jugable.md` a `specs/04-boost-agrandar-pala.md`.
+Playable MVP implemented, with incremental improvements via specs:
 
-## Estructura
+- **SPEC 01** — Playable MVP: single canvas level, keyboard-controlled paddle, ball with variable-angle bounce, blocks that add to the score, 3 lives, win/lose screens with restart.
+- **SPEC 02** — Animated block destruction: 4-frame explosion when a block breaks.
+- **SPEC 03** — Collision sounds: sound on ball bounce and when a block breaks or a life is lost.
+- **SPEC 04** — Paddle-enlarge boost: item that occasionally falls and, when caught, enlarges the paddle and temporarily speeds up the ball.
 
-- `index.html`, `style.css`, `game.js` — juego.
-- `assets/spritesheet-breakout.png` + `assets/spritesheet.js` — sprites de bloques y animaciones.
-- `assets/icons/star.png` — ícono del boost.
-- `assets/sounds/` — efectos de sonido (`ball-bounce.mp3`, `break-sound.mp3`, `boost.mp3`).
-- `specs/` — specs numeradas del desarrollo (workflow `/spec` y `/spec-impl`).
+Full detail for each spec in `specs/01-mvp-jugable.md` through `specs/04-boost-agrandar-pala.md`.
 
-## Workflow de desarrollo
+## Structure
 
-Repo usa comandos `/spec` y `/spec-impl` para desarrollo guiado por specs. Ver `CLAUDE.md` para detalle.
+- `index.html`, `style.css`, `game.js` — the game.
+- `assets/spritesheet-breakout.png` + `assets/spritesheet.js` — block sprites and animations.
+- `assets/icons/star.png` — boost icon.
+- `assets/sounds/` — sound effects (`ball-bounce.mp3`, `break-sound.mp3`, `boost.mp3`).
+- `specs/` — numbered development specs (`/spec` and `/spec-impl` workflow).
+
+## Development workflow
+
+This repo uses `/spec` and `/spec-impl` commands for spec-driven development. See `CLAUDE.md` for details.
