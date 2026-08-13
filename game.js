@@ -9,10 +9,10 @@ function playSound( audio ) {
   audio.play();
 }
 
-const BRICK_COLS = 8;
+const BRICK_COLS = 11;
 const BRICK_ROWS = 5;
-const BRICK_W = 90;
-const BRICK_H = 24;
+const BRICK_W = 63.6;
+const BRICK_H = 21.6;
 const BRICK_GAP = 5;
 const BRICK_MARGIN_LEFT = 25;
 const BRICK_MARGIN_TOP = 40;
