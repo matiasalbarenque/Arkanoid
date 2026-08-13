@@ -15,8 +15,8 @@ boostImg.loaded = false;
 boostImg.onload = () => { boostImg.loaded = true; };
 boostImg.src = 'assets/icons/star.png';
 
-const BOOST_CHECK_INTERVAL = 5000;
-const BOOST_SPAWN_CHANCE = 0.1;
+const BOOST_SPAWN_MIN_INTERVAL = 4000;
+const BOOST_SPAWN_MAX_INTERVAL = 10000;
 const BOOST_FALL_SPEED = 2;
 const BOOST_ROTATION_SPEED = Math.PI; // rad/s (~180°/s)
 const BOOST_SIZE = 24;
@@ -107,6 +107,17 @@ function update() {
   updateExplosions();
   updateBoostSpawn();
   updateFallingBoosts();
+  updateBoostExpiry();
+}
+
+function updateBoostExpiry() {
+  const paddle = state.paddle;
+
+  if ( paddle.boostExpiresAt !== null && performance.now() >= paddle.boostExpiresAt ) {
+    paddle.w = paddle.baseW;
+    state.ball.speed = state.ball.baseSpeed;
+    paddle.boostExpiresAt = null;
+  }
 }
 
 function updateFallingBoosts() {
@@ -142,23 +153,28 @@ function applyPaddleBoost() {
   paddle.boostExpiresAt = performance.now() + BOOST_DURATION;
 }
 
-let lastBoostCheckAt = performance.now();
+function randomBoostInterval() {
+  return BOOST_SPAWN_MIN_INTERVAL + Math.random() * ( BOOST_SPAWN_MAX_INTERVAL - BOOST_SPAWN_MIN_INTERVAL );
+}
+
+let lastBoostSpawnAt = performance.now();
+let nextBoostInterval = randomBoostInterval();
 
 function updateBoostSpawn() {
   const now = performance.now();
-  if ( now - lastBoostCheckAt < BOOST_CHECK_INTERVAL ) return;
-  lastBoostCheckAt = now;
+  if ( now - lastBoostSpawnAt < nextBoostInterval ) return;
 
-  if ( Math.random() < BOOST_SPAWN_CHANCE ) {
-    state.fallingBoosts.push( {
-      x: Math.random() * ( canvas.width - BOOST_SIZE ),
-      y: 0,
-      w: BOOST_SIZE,
-      h: BOOST_SIZE,
-      rotation: 0,
-    } );
-    console.log( 'boost spawned' );
-  }
+  lastBoostSpawnAt = now;
+  nextBoostInterval = randomBoostInterval();
+
+  state.fallingBoosts.push( {
+    x: Math.random() * ( canvas.width - BOOST_SIZE ),
+    y: 0,
+    w: BOOST_SIZE,
+    h: BOOST_SIZE,
+    rotation: 0,
+  } );
+  console.log( 'boost spawned' );
 }
 
 const EXPLOSION_FRAME_DURATION = 150;
@@ -215,12 +231,17 @@ function loseLife() {
 
   state.paddle.x = 320;
   state.paddle.y = 560;
+  state.paddle.w = state.paddle.baseW;
+  state.paddle.boostExpiresAt = null;
 
   state.ball.x = 401;
   state.ball.y = 546;
   state.ball.vx = 0;
   state.ball.vy = 0;
+  state.ball.speed = state.ball.baseSpeed;
   state.ballAttached = true;
+
+  state.fallingBoosts = [];
 
   if ( state.lives === 0 ) {
     state.screen = 'lost';
@@ -313,6 +334,7 @@ function draw() {
   }
 
   drawExplosions();
+  drawFallingBoosts();
 
   drawSprite( ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h );
   drawSprite( ctx, 'ball', state.ball.x - state.ball.r, state.ball.y - state.ball.r, state.ball.r * 2, state.ball.r * 2 );
@@ -321,6 +343,21 @@ function draw() {
 
   if ( state.screen === 'won' ) drawOverlay( '¡Ganaste!' );
   if ( state.screen === 'lost' ) drawOverlay( 'Perdiste' );
+}
+
+function drawFallingBoosts() {
+  if ( !boostImg.loaded ) return;
+
+  for ( const boost of state.fallingBoosts ) {
+    const cx = boost.x + boost.w / 2;
+    const cy = boost.y + boost.h / 2;
+
+    ctx.save();
+    ctx.translate( cx, cy );
+    ctx.rotate( boost.rotation );
+    ctx.drawImage( boostImg, -boost.w / 2, -boost.h / 2, boost.w, boost.h );
+    ctx.restore();
+  }
 }
 
 const EXPLOSION_SCALE = 1.4; // escala final, 1.0 = tamaño del bloque

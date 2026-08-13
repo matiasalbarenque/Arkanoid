@@ -1,6 +1,6 @@
 # SPEC 04 — Boost de agrandar pala
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 01, SPEC 03
 > **Date:** 2026-08-13
 > **Objective:** Cada cierto intervalo cae desde arriba del canvas, con baja probabilidad, un boost giratorio basado en `assets/icons/star.png` que al ser atrapado por la pala la agranda (acumulable, con tope) y aumenta la velocidad de la bola un 10% (acumulable), ambos efectos temporales y reseteados juntos tras 10 segundos.
@@ -11,7 +11,7 @@
 
 **In:**
 
-- Cada `BOOST_CHECK_INTERVAL` (5000ms) se tira una probabilidad `BOOST_SPAWN_CHANCE` (10%) de spawnear un boost nuevo, en una posición X aleatoria dentro del ancho del canvas, y = 0.
+- Cada boost spawnea tras un intervalo aleatorio entre `BOOST_SPAWN_MIN_INTERVAL` (4000ms) y `BOOST_SPAWN_MAX_INTERVAL` (10000ms), con 100% de probabilidad garantizada (no hay tirada de probabilidad, solo el intervalo es aleatorio), en una posición X aleatoria dentro del ancho del canvas, y = 0. Tras cada spawn se sortea un nuevo intervalo aleatorio dentro del mismo rango para el próximo.
 - El boost cae a velocidad constante (`BOOST_FALL_SPEED`, 2px/frame) y rota sobre su propio eje (~180°/segundo) mientras cae, usando `assets/icons/star.png` como imagen (cargada aparte del spritesheet de bloques).
 - Colisión rectángulo boost vs rectángulo pala (AABB simple, igual de estilo que la colisión bola-bloque existente): si se solapan, el boost se atrapa.
 - Al atrapar un boost: el ancho de la pala aumenta un incremento fijo (`PADDLE_BOOST_STEP`, +20% del ancho base) respecto a su ancho actual boosteado, hasta un tope de `PADDLE_BOOST_MAX` (2x el ancho base); la velocidad de la bola (`ball.speed`) se multiplica x1.10 respecto a su valor boosteado actual; y se reinicia a `BOOST_DURATION` (10000ms) un único temporizador compartido por ambos efectos.
@@ -63,9 +63,9 @@ Convenciones:
 
 ## Implementation plan
 
-1. Declarar constantes de módulo en `game.js`: `BOOST_CHECK_INTERVAL`, `BOOST_SPAWN_CHANCE`, `BOOST_FALL_SPEED`, `BOOST_ROTATION_SPEED`, `BOOST_SIZE`, `PADDLE_BOOST_STEP`, `PADDLE_BOOST_MAX`, `BOOST_DURATION`; cargar `assets/icons/star.png` en un `Image()` de módulo (`boostImg`) con su propio flag de `loaded`; declarar y precargar `boostSound = new Audio('assets/sounds/boost.mp3')`. Prueba manual: el juego sigue cargando sin errores en consola, sin cambios visibles todavía.
+1. Declarar constantes de módulo en `game.js`: `BOOST_SPAWN_MIN_INTERVAL`, `BOOST_SPAWN_MAX_INTERVAL`, `BOOST_FALL_SPEED`, `BOOST_ROTATION_SPEED`, `BOOST_SIZE`, `PADDLE_BOOST_STEP`, `PADDLE_BOOST_MAX`, `BOOST_DURATION`; cargar `assets/icons/star.png` en un `Image()` de módulo (`boostImg`) con su propio flag de `loaded`; declarar y precargar `boostSound = new Audio('assets/sounds/boost.mp3')`. Prueba manual: el juego sigue cargando sin errores en consola, sin cambios visibles todavía.
 2. Agregar `fallingBoosts: []` a `createInitialState()`, y los campos `baseW`/`boostExpiresAt` a `paddle`, `baseSpeed` a `ball`. Prueba manual: el juego sigue jugándose igual que antes.
-3. Implementar `updateBoostSpawn()`: cada `BOOST_CHECK_INTERVAL` ms transcurridos desde el último chequeo, tira `Math.random() < BOOST_SPAWN_CHANCE` y si sale true agrega una entrada a `state.fallingBoosts` en X aleatoria (`Math.random() * (canvas.width - BOOST_SIZE)`), y = 0. Llamarla desde `update()`. Prueba manual: loguear en consola cuando spawnea un boost y confirmar que aparece cada tanto tiempo jugando varios minutos.
+3. Implementar `updateBoostSpawn()`: cada vez que transcurre el intervalo aleatorio vigente desde el último spawn, agrega una entrada a `state.fallingBoosts` en X aleatoria (`Math.random() * (canvas.width - BOOST_SIZE)`), y = 0, y sortea el próximo intervalo aleatorio entre `BOOST_SPAWN_MIN_INTERVAL` y `BOOST_SPAWN_MAX_INTERVAL`. Llamarla desde `update()`. Prueba manual: loguear en consola cuando spawnea un boost y confirmar que aparece de forma consistente cada 4-10s jugando varios minutos.
 4. Implementar `updateFallingBoosts()`: mueve cada boost `y += BOOST_FALL_SPEED`, incrementa `rotation`, elimina los que salen del canvas por abajo (`y > canvas.height`) sin ningún efecto, y detecta colisión AABB contra `state.paddle` — al atrapar uno: aplicar `applyPaddleBoost()` (ver paso 5), reproducir `playSound(boostSound)`, y eliminar el boost atrapado del array. Llamarla desde `update()`. Prueba manual: dejar caer un boost sin mover la pala confirma que desaparece solo al llegar abajo; mover la pala para interceptarlo confirma que desaparece y agranda la pala.
 5. Implementar `applyPaddleBoost()`: `paddle.w = Math.min(paddle.baseW * PADDLE_BOOST_MAX, paddle.w + paddle.baseW * PADDLE_BOOST_STEP)`; `ball.speed = ball.speed * 1.10`; `paddle.boostExpiresAt = performance.now() + BOOST_DURATION`. Prueba manual: agarrar boosts seguidos muestra la pala creciendo por pasos hasta detenerse en el doble del ancho base, sin pasarse.
 6. Implementar chequeo de expiración dentro de `update()`: si `paddle.boostExpiresAt !== null && performance.now() >= paddle.boostExpiresAt`, resetear `paddle.w = paddle.baseW`, `ball.speed = ball.baseSpeed`, `paddle.boostExpiresAt = null`. Prueba manual: agarrar un boost y esperar 10s sin agarrar otro confirma que la pala y la velocidad de la bola vuelven de golpe a su tamaño/velocidad original.
@@ -77,22 +77,22 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] Cada `BOOST_CHECK_INTERVAL` (5s) hay una probabilidad baja (10%) de que aparezca un boost cayendo desde arriba del canvas en una posición X aleatoria.
-- [ ] El boost cae a velocidad constante girando visiblemente sobre su propio eje, usando la imagen `assets/icons/star.png`.
-- [ ] Si el boost llega al borde inferior del canvas sin ser atrapado por la pala, desaparece sin sonido ni penalidad.
-- [ ] Atrapar un boost con la pala agranda su ancho un paso fijo y aumenta la velocidad de la bola un 10%, reproduciendo `assets/sounds/boost.mp3`.
-- [ ] Atrapar varios boosts seguidos sigue agrandando la pala por pasos hasta un tope de 2x su ancho base, sin superarlo; la velocidad de la bola sigue acumulándose x1.10 en cada uno sin tope definido.
-- [ ] Cada boost atrapado reinicia el temporizador único a 10 segundos completos, sin sumarse a un timer anterior.
-- [ ] Al expirar el temporizador sin atrapar otro boost, la pala y la velocidad de la bola vuelven de golpe a sus valores base.
-- [ ] Perder una vida con un boost activo resetea de inmediato el ancho de la pala y la velocidad de la bola a su base, y elimina cualquier boost cayendo en ese momento.
-- [ ] Reiniciar la partida (botón "Reiniciar") elimina cualquier boost activo o cayendo, con pala y bola en su estado base.
+- [x] Cada intervalo aleatorio entre 4 y 10 segundos aparece, garantizado (100%), un boost cayendo desde arriba del canvas en una posición X aleatoria.
+- [x] El boost cae a velocidad constante girando visiblemente sobre su propio eje, usando la imagen `assets/icons/star.png`.
+- [x] Si el boost llega al borde inferior del canvas sin ser atrapado por la pala, desaparece sin sonido ni penalidad.
+- [x] Atrapar un boost con la pala agranda su ancho un paso fijo y aumenta la velocidad de la bola un 10%, reproduciendo `assets/sounds/boost.mp3`.
+- [x] Atrapar varios boosts seguidos sigue agrandando la pala por pasos hasta un tope de 2x su ancho base, sin superarlo; la velocidad de la bola sigue acumulándose x1.10 en cada uno sin tope definido.
+- [x] Cada boost atrapado reinicia el temporizador único a 10 segundos completos, sin sumarse a un timer anterior.
+- [x] Al expirar el temporizador sin atrapar otro boost, la pala y la velocidad de la bola vuelven de golpe a sus valores base.
+- [x] Perder una vida con un boost activo resetea de inmediato el ancho de la pala y la velocidad de la bola a su base, y elimina cualquier boost cayendo en ese momento.
+- [x] Reiniciar la partida (botón "Reiniciar") elimina cualquier boost activo o cayendo, con pala y bola en su estado base.
 
 ---
 
 ## Decisions
 
 - **Sí:** imagen `assets/icons/star.png` cargada aparte del spritesheet de bloques (`Image()` propio), en vez de forzarla dentro de `spritesheet.js`. Ese módulo solo indexa coordenadas de `spritesheet-breakout.png`; el ícono del boost es un archivo separado ya provisto por el usuario.
-- **Sí:** spawn por chequeo periódico con probabilidad baja (`BOOST_CHECK_INTERVAL` + `BOOST_SPAWN_CHANCE`), no ligado a romper bloques. Así lo pidió el usuario explícitamente: el boost cae solo, de forma random, no como drop de bloque.
+- **Sí:** spawn garantizado (100%) a intervalo aleatorio entre `BOOST_SPAWN_MIN_INTERVAL` (4s) y `BOOST_SPAWN_MAX_INTERVAL` (10s), no ligado a romper bloques. Cambio explícito del usuario respecto al diseño original (que era probabilidad baja cada intervalo fijo): ahora el spawn es determinístico en cuanto a que siempre ocurre, solo el tiempo entre spawns es random.
 - **Sí:** agrandamiento acumulable por pasos con tope (`PADDLE_BOOST_MAX` = 2x), en vez de un único salto fijo de tamaño. El usuario pidió explícitamente que se acumule; el tope evita un paddle absurdamente ancho que rompa la dificultad del juego.
 - **Sí:** timer único que se resetea a 10s completos en cada catch, en vez de sumar duraciones. Decisión explícita del usuario para mantener el comportamiento simple y predecible.
 - **Sí:** el aumento de velocidad de la bola se acumula (x1.10 por cada boost) pero se resetea junto con el paddle al expirar el timer, en vez de ser permanente. Decisión explícita del usuario.

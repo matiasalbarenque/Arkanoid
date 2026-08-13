@@ -1,6 +1,6 @@
 # SPEC 01 — MVP jugable de Arkanoid
 
-> **Status:** approved
+> **Status:** Implemented
 > **Depends on:** ninguno
 > **Date:** 2026-08-12
 > **Objective:** Un único nivel jugable de Arkanoid en canvas, con pala controlada por teclado, bola con rebote de ángulo variable, bloques que se rompen sumando puntaje, 3 vidas, y pantallas de victoria/derrota con reinicio.
@@ -76,15 +76,15 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] El juego carga en el navegador sin errores en consola.
-- [ ] Las flechas izquierda/derecha mueven la pala sin salirse del canvas.
-- [ ] La bola rebota correctamente en paredes izquierda, derecha y superior.
-- [ ] El ángulo de rebote en la pala cambia según el punto de impacto.
-- [ ] Romper un bloque lo elimina visualmente y suma exactamente 10 puntos al score mostrado en el HUD.
-- [ ] Perder las 3 vidas (bola cae 3 veces) muestra pantalla de derrota.
-- [ ] Romper los 40 bloques muestra pantalla de victoria.
-- [ ] El botón "Reiniciar" en ambas pantallas devuelve el juego al estado inicial (score 0, 3 vidas, 40 bloques, pala y bola en posición inicial).
-- [ ] Tras perder una vida (sin llegar a 0), la bola queda pegada a la pala hasta presionar una tecla.
+- [x] El juego carga en el navegador sin errores en consola.
+- [x] Las flechas izquierda/derecha mueven la pala sin salirse del canvas.
+- [x] La bola rebota correctamente en paredes izquierda, derecha y superior.
+- [x] El ángulo de rebote en la pala cambia según el punto de impacto.
+- [x] Romper un bloque lo elimina visualmente y suma exactamente 10 puntos al score mostrado en el HUD.
+- [x] Perder las 3 vidas (bola cae 3 veces) muestra pantalla de derrota.
+- [x] Romper los 40 bloques muestra pantalla de victoria.
+- [x] El botón "Reiniciar" en ambas pantallas devuelve el juego al estado inicial (score 0, 3 vidas, 40 bloques, pala y bola en posición inicial).
+- [x] Tras perder una vida (sin llegar a 0), la bola queda pegada a la pala hasta presionar una tecla.
 
 ---
 
